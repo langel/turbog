@@ -1,5 +1,5 @@
 
-timerport    .equ $0C00
+timerport    .equ $1C00
 timer_cnt    .equ timerport
 timer_ctrl   .equ timerport+1        
 
@@ -24,13 +24,16 @@ vsync_cnt:	.ds 1	; counter for 'wait_vsync' routine
 	.org $e000
 	.include "src/boot.asm"
 	.include "src/nmi.asm"
+	.include "src/psg.asm"
+	.include "src/util.asm"
 	.include "src/vdc.asm"
 	; VECTORS
 	.org $fff6
 	; irq2
-	.dw interrupt_rti
+	.dw nmi
 	; irq1
-	.dw irq1
+	; XXX is this vsync?
+	.dw nmi
 	; timer
 	.dw timer_snare
 	; nmi
@@ -40,4 +43,5 @@ vsync_cnt:	.ds 1	; counter for 'wait_vsync' routine
 	.dw start_up
       
 	.bank $01
+	.org $4000
 	.incbin "guntner.chr"
