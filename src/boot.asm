@@ -33,11 +33,10 @@ start_up:
 
 	; reset timer?
 	stz timer_ctrl
-	; set timer
+	; keep timer configured but disabled for now
 	lda #$00
 	sta timer_cnt
-	lda #$01
-	sta timer_ctrl
+	stz timer_ctrl
 
 	; disable irq?
 	;lda %00000111
@@ -48,7 +47,7 @@ start_up:
 	; enable background and sprites
 	lda #$05   ; select the control register
 	sta $0000
-	lda #$cc   ; enable bits 3, 4, 6 and 7
+	lda #$c8   ; BG+SPR + VBlank IRQ only (Raster IRQ disabled)
 	sta $0002
 	lda #$00
 	sta $0003
@@ -87,7 +86,35 @@ start_up:
 	lda #$ff
 	jsr bat_fill
 	jsr chr_load
+
+	; SPRITES
 	jsr sprites_clear
+	ldx #$00
+	ldy #$00
+.sprite_priority
+	txa
+	lsr a
+	lsr a
+	lsr a
+	lsr a
+	ora #$80
+	sta $2203,x
+	txa
+	sta $2200,x
+	; pattern code
+	lda #$01
+	sta $2302,x
+	txa
+	lsr a
+	lsr a
+	lsr a
+	lsr a
+	sta $2202,x
+	inx
+	inx
+	inx
+	inx
+	bne .sprite_priority
 	
 	;jsr psg_init
 
@@ -96,8 +123,11 @@ start_up:
 	;lda >#nmi
 	;sta $0023
 
-	;lda %00000111
-	;sta $1402
+	; enable only IRQ1 (VDC), keep IRQ2 and TIMER masked
+	lda #$05
+	sta $1402
+	; clear any pending VDC IRQ before enabling CPU interrupts
+	lda $0000
 
 	; enable interrupts
 	cli

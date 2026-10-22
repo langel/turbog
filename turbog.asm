@@ -16,7 +16,7 @@ temp .ds 1
 
 	.bss
  	.org $2680
-vsync_cnt:	.ds 1	; counter for 'wait_vsync' routine 
+vsync_cnt:	.ds 1	; counter for 'wait_vsync' routine
     
 	.code
 
@@ -30,14 +30,13 @@ vsync_cnt:	.ds 1	; counter for 'wait_vsync' routine
 	; VECTORS
 	.org $fff6
 	; irq2
-	.dw nmi
+	.dw irq_dispatch
 	; irq1
-	; XXX is this vsync?
-	.dw nmi
+	.dw irq_dispatch
 	; timer
-	.dw timer_snare
+	.dw irq_dispatch
 	; nmi
-	.dw nmi
+	.dw nmi_handler
 	; reset
 	.org $fffe     
 	.dw start_up
